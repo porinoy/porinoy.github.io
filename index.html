@@ -1,13 +1,804 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>matri</title>
-  </head>
-  <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.ts"></script>
-  </body>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BANDHAN — A Four-Decade Corpus of Bengali Matrimonial Advertisements</title>
+<style>
+
+  @import url('https://fonts.googleapis.com/css2?family=Tiro+Bangla:ital@0;1&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  :root{
+    --paper:        #EDE7D9;
+    --paper-deep:    #E3DCC9;
+    --ink:          #1C1B19;
+    --ink-soft:     #423F38;
+    --rule:         #8B8576;
+    --rule-light:   #C9C2AC;
+    --accent:       #A13D2B;
+    --accent-soft:  #C9744F;
+    --archive-green:#5B6B4E;
+    --card:         #F6F2E8;
+
+    --display: 'Source Serif 4', 'Tiro Bangla', serif;
+    --bangla:  'Tiro Bangla', serif;
+    --body:    'IBM Plex Sans', sans-serif;
+    --mono:    'IBM Plex Mono', monospace;
+  }
+
+  *{ box-sizing: border-box; }
+  html{ scroll-behavior: smooth; }
+
+  body{
+    margin:0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--body);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* subtle paper grain */
+  body::before{
+    content:"";
+    position: fixed; inset:0;
+    pointer-events:none;
+    z-index: 0;
+    opacity:0.5;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(0,0,0,0.018) 0, transparent 35%),
+      radial-gradient(circle at 80% 70%, rgba(0,0,0,0.018) 0, transparent 35%),
+      repeating-linear-gradient(0deg, rgba(0,0,0,0.012) 0px, transparent 1px, transparent 2px);
+  }
+
+  a{ color: var(--accent); text-decoration: none; border-bottom: 1px solid currentColor; }
+  a:hover{ color: var(--ink); }
+
+  .wrap{
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 32px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ---------- top masthead ---------- */
+  .masthead{
+    border-bottom: 3px solid var(--ink);
+    padding: 22px 0 14px;
+  }
+  .masthead .wrap{
+    display:flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .masthead-left{
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .masthead-right{
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--ink-soft);
+    text-align: right;
+  }
+  .masthead-right a{ border-bottom: none; color: var(--ink-soft); }
+  .masthead-right a:hover{ color: var(--accent); }
+
+  /* ---------- hero ---------- */
+  .hero{
+    padding: 64px 0 56px;
+    border-bottom: 1px solid var(--rule-light);
+  }
+  .kicker{
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--archive-green);
+    margin-bottom: 18px;
+    display:flex;
+    align-items:center;
+    gap: 10px;
+  }
+  .kicker::before{
+    content:"";
+    width: 22px; height: 1px;
+    background: var(--archive-green);
+    display:inline-block;
+  }
+  h1.title{
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(48px, 8vw, 92px);
+    line-height: 0.96;
+    margin: 0 0 8px;
+    letter-spacing: -0.01em;
+  }
+  h1.title .bn{
+    font-family: var(--bangla);
+    font-weight: 400;
+    font-size: 0.42em;
+    color: var(--accent);
+    display:block;
+    margin-bottom: 6px;
+    letter-spacing: 0;
+  }
+  .acronym-letter{
+  color: var(--accent);
+  font-weight: 700;
+  }
+  h2.expansion{
+  font-family: var(--display);
+  font-size: clamp(18px, 2.2vw, 24px);
+  font-weight: 400;
+  color: var(--ink-soft);
+  margin: 8px 0 0;
+}
+  .subtitle{
+    font-family: var(--display);
+    font-size: clamp(18px, 2.4vw, 24px);
+    color: var(--ink-soft);
+    max-width: 720px;
+    margin: 18px 0 30px;
+    font-weight: 400;
+  }
+  .hero-meta{
+    display:flex;
+    flex-wrap: wrap;
+    gap: 28px;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin-bottom: 34px;
+  }
+  .hero-meta span b{
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  .cta-row{
+    display:flex;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .btn{
+    font-family: var(--body);
+    font-weight: 600;
+    font-size: 14px;
+    padding: 13px 22px;
+    border: 1.5px solid var(--ink);
+    border-radius: 2px;
+    background: transparent;
+    color: var(--ink);
+    border-bottom-width: 1.5px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+  }
+  .btn.primary{
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--paper);
+  }
+  .btn.primary:hover{ background: var(--ink); border-color: var(--ink); color: var(--paper); }
+  .btn:not(.primary):hover{ background: var(--ink); color: var(--paper); }
+
+  /* ---------- timeline scrubber (signature element) ---------- */
+  .scrubber-section{
+    padding: 56px 0 64px;
+    border-bottom: 1px solid var(--rule-light);
+  }
+  .section-label{
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .section-heading{
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: clamp(26px, 3.4vw, 38px);
+    margin: 0 0 12px;
+  }
+  .section-intro{
+    color: var(--ink-soft);
+    max-width: 680px;
+    margin-bottom: 36px;
+    font-size: 15.5px;
+  }
+
+  .scrubber{
+    border: 1px solid var(--ink);
+    background: var(--card);
+    box-shadow: 6px 6px 0 var(--rule-light);
+  }
+  .scrubber-display{
+    position: relative;
+    height: 340px;
+    overflow: hidden;
+    border-bottom: 1px solid var(--ink);
+  }
+  .era-panel{
+    position: absolute;
+    inset: 0;
+    padding: 28px 32px;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    display:flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .era-panel.active{ opacity: 1; }
+
+  .era-mock{
+    display:flex;
+    gap: 18px;
+    align-items: stretch;
+    height: 200px;
+    margin-bottom: 18px;
+  }
+  .era-col{
+    flex:1;
+    border: 1.5px solid var(--ink);
+    background: var(--paper);
+    position: relative;
+    padding: 8px;
+    display:flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .era-col .hdr{
+    font-family: var(--mono);
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    background: var(--ink);
+    color: var(--paper);
+    padding: 3px 6px;
+    width: fit-content;
+  }
+  .era-col .line{
+    height: 4px;
+    background: var(--rule);
+    opacity: 0.55;
+  }
+  .era-col .line.short{ width: 60%; }
+  .era-col .line.med{ width: 80%; }
+
+  /* era-specific visual texture */
+  [data-era="1984"] .era-col{ border-style: solid; filter: contrast(0.92) sepia(0.15); }
+  [data-era="1984"] .era-col .line{ background: var(--rule); opacity: 0.4; }
+  [data-era="1998"] .era-col{ border-width: 1px; }
+  [data-era="2010"] .era-mock{ gap: 10px; }
+  [data-era="2010"] .era-col{ border-color: var(--archive-green); }
+  [data-era="2024"] .era-mock{ gap: 14px; }
+  [data-era="2024"] .era-col{ border-radius: 3px; border-color: var(--accent-soft); box-shadow: 2px 2px 0 var(--rule-light); }
+
+  .era-caption{
+    font-family: var(--body);
+    font-size: 14px;
+    color: var(--ink-soft);
+    max-width: 560px;
+  }
+  .era-caption b{ color: var(--ink); }
+
+  .scrubber-controls{
+    display:flex;
+  }
+  .era-img{
+  flex: 1;
+  height: 100%;
+  width: 50%;
+  object-fit: contain;
+  border: 1.5px solid var(--ink);
+  background: var(--paper);
+}
+  .era-btn{
+    flex:1;
+    font-family: var(--mono);
+    font-size: 13px;
+    padding: 16px 8px;
+    text-align: center;
+    background: var(--paper-deep);
+    border: none;
+    border-right: 1px solid var(--ink);
+    cursor: pointer;
+    color: var(--ink-soft);
+    position: relative;
+  }
+  .era-btn:last-child{ border-right: none; }
+  .era-btn .yr{ display:block; font-size: 17px; font-weight: 600; color: var(--ink); margin-bottom: 2px; }
+  .era-btn .lbl{ font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .era-btn.active{ background: var(--accent); color: var(--paper); }
+  .era-btn.active .yr{ color: var(--paper); }
+  .era-btn:not(.active):hover{ background: var(--rule-light); }
+
+  /* ---------- two-col layout ---------- */
+  .two-col{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 56px;
+    padding: 56px 0;
+    border-bottom: 1px solid var(--rule-light);
+  }
+  @media (max-width: 760px){ .two-col{ grid-template-columns: 1fr; gap: 36px; } }
+
+  .col p{ font-size: 15.5px; color: var(--ink-soft); margin: 0 0 16px; }
+  .col p strong{ color: var(--ink); }
+
+.pipeline-fig{
+  border: 1px solid var(--rule);
+  width: 100%;
+  display: block;
+  object-fit: cover;
+  margin-bottom: 10px;
+}
+  .fig-caption{
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+  }
+  .fig-caption b{ color: var(--accent); }
+
+  /* ---------- numbered pipeline steps ---------- */
+  .steps{
+    padding: 56px 0;
+    border-bottom: 1px solid var(--rule-light);
+  }
+  .step-grid{
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border: 1px solid var(--ink);
+    margin-top: 30px;
+  }
+  @media (max-width: 760px){ .step-grid{ grid-template-columns: 1fr; } }
+  .step{
+    padding: 30px 28px;
+    border-right: 1px solid var(--rule-light);
+    position: relative;
+  }
+  .step:last-child{ border-right: none; }
+  @media (max-width: 760px){
+    .step{ border-right:none; border-bottom: 1px solid var(--rule-light); }
+    .step:last-child{ border-bottom:none; }
+  }
+  .step-num{
+    font-family: var(--mono);
+    font-size: 34px;
+    color: var(--rule-light);
+    font-weight: 600;
+    line-height: 1;
+    margin-bottom: 14px;
+  }
+  .step h3{
+    font-family: var(--display);
+    font-size: 19px;
+    margin: 0 0 10px;
+  }
+  .step p{
+    font-size: 14px;
+    color: var(--ink-soft);
+    margin:0;
+  }
+  .step .tag{
+    display:inline-block;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--archive-green);
+    border: 1px solid var(--archive-green);
+    padding: 2px 7px;
+    margin-top: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  /* ---------- stats strip ---------- */
+  .stats{
+    padding: 56px 0;
+    border-bottom: 1px solid var(--rule-light);
+  }
+  .stats-grid{
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--rule-light);
+    border: 1px solid var(--ink);
+    margin-top: 30px;
+  }
+  @media (max-width: 760px){ .stats-grid{ grid-template-columns: repeat(2,1fr); } }
+  .stat-cell{
+    background: var(--card);
+    padding: 26px 20px;
+    text-align:center;
+  }
+  .stat-num{
+    font-family: var(--mono);
+    font-size: clamp(26px, 3vw, 34px);
+    font-weight: 600;
+    color: var(--accent);
+    display:block;
+  }
+  .stat-lbl{
+    font-family: var(--body);
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    margin-top: 6px;
+  }
+  .table-note{
+    margin-top: 18px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--rule);
+  }
+
+  /* ---------- challenges accordion-ish list ---------- */
+  .challenges{
+    padding: 56px 0;
+    border-bottom: 1px solid var(--rule-light);
+  }
+  .challenge-list{
+    margin-top: 30px;
+    border-top: 1px solid var(--ink);
+  }
+  .challenge{
+    display:grid;
+    grid-template-columns: 240px 1fr;
+    gap: 30px;
+    padding: 26px 0;
+    border-bottom: 1px solid var(--rule-light);
+  }
+  @media (max-width: 700px){ .challenge{ grid-template-columns: 1fr; gap: 10px; } }
+  .challenge-name{
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 17px;
+    color: var(--ink);
+  }
+  .challenge-name .vs{
+    display:block;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--rule);
+    margin-top: 4px;
+    text-transform: uppercase;
+  }
+  .challenge p{
+    font-size: 14.5px;
+    color: var(--ink-soft);
+    margin:0;
+    max-width: 620px;
+  }
+
+  /* ---------- citation / footer ---------- */
+  .cite-section{
+    padding: 56px 0;
+  }
+  .cite-box{
+    background: var(--ink);
+    color: var(--paper);
+    padding: 28px 30px;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.7;
+    overflow-x: auto;
+    border-radius: 2px;
+    position: relative;
+  }
+  .copy-btn{
+    position: absolute;
+    top: 14px; right: 14px;
+    font-family: var(--body);
+    font-size: 11px;
+    background: transparent;
+    color: var(--paper);
+    border: 1px solid var(--rule-light);
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 2px;
+  }
+  .copy-btn:hover{ background: var(--paper); color: var(--ink); }
+
+  .footer{
+    border-top: 3px solid var(--ink);
+    padding: 30px 0 40px;
+    margin-top: 20px;
+  }
+  .footer-row{
+    display:flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
+  .footer-row a{ color: var(--ink-soft); border-bottom: 1px solid var(--rule-light); }
+  .footer-row a:hover{ color: var(--accent); }
+
+  .placeholder-note{
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    border: 1px dashed var(--accent-soft);
+    padding: 8px 12px;
+    margin-top: 10px;
+    background: rgba(161,61,43,0.04);
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ transition: none !important; scroll-behavior: auto !important; }
+  }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="masthead-left">ICDAR 2026 &nbsp;·&nbsp; Workshop on Machine Learning </div>
+    <div class="masthead-right">
+      <a href="https://anonymous.4open.science/r/porinoy_dataset-7DB5/README.md">Repository</a> &nbsp;·&nbsp;
+      <a href="#citation">Cite</a>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <p class="kicker">Document Layout Analysis &amp; OCR · Bengali Press Archive</p>
+    <h1 class="title">
+      <span class="bn">বন্ধন</span>
+      BANDHAN 
+    </h1>
+    <h2 class="expansion">
+  <span class="acronym-letter">B</span>engali
+  <span class="acronym-letter">A</span>dvertisement
+  <span class="acronym-letter">N</span>ewspaper
+  <span class="acronym-letter">D</span>ataset for
+  <span class="acronym-letter">H</span>istorical
+  <span class="acronym-letter">A</span>nalysis of
+  <span class="acronym-letter">N</span>uptials
+</h2>
+    <p class="subtitle">
+      A four-decade corpus of Bengali matrimonial advertisements (1984–2024), curated to document
+      the structural evolution of classified print — from dense hand-set columns to digital hybrid layouts.
+    </p>
+    <div class="hero-meta">
+      <span><b>40</b> years archival span</span>
+      <span><b>6</b> Bengali newspapers</span>
+      <span><b>3</b> annotation classes</span>
+      <span><b>κ&nbsp;>&nbsp;0.85</b> inter-annotator agreement</span>
+    </div>
+    <div class="cta-row">
+      <a class="btn primary" href="https://anonymous.4open.science/r/porinoy_dataset-7DB5/README.md">Browse the dataset →</a>
+      <a class="btn" href="#dataset">Annotation Process</a>
+      <a class="btn" href="#citation">Cite this work</a>
+    </div>
+  </div>
+</section>
+
+<section class="scrubber-section">
+  <div class="wrap">
+    <p class="section-label">01 — Why this corpus exists</p>
+    <h2 class="section-heading">Four print eras, one column</h2>
+    <p class="section-intro">
+      The matrimonial column is one of the longest-running, most formally constrained genres in South Asian
+      print classifieds. Its layout has quietly mutated across four decades of typesetting technology —
+      while the underlying task, fitting a life story into the smallest billable space, has not. Scrub through
+      the eras below.
+    </p>
+
+    <div class="scrubber">
+      <div class="scrubber-display" id="eraDisplay">
+        <div class="era-panel active" data-era="1984">
+          <div class="era-mock">
+            <img src="images/1984_1.png" alt="1984 matrimonial layout sample 1" class="era-img">
+            <img src="images/1984_2.png" alt="1984 matrimonial layout sample 2" class="era-img">
+          </div>
+          <p class="era-caption"><b>1984 — Dense-packing era.</b> Hand-set hot-metal columns, hairline rules, near-zero whitespace between listings. Ink-bleed and paper aging are common; bounding boxes must be drawn within a 2px tolerance to avoid merging adjacent ads.</p>
+        </div>
+
+        <div class="era-panel" data-era="1998">
+          <div class="era-mock">
+            <img src="images/1998_1.png" alt="1998 matrimonial layout sample 1" class="era-img">
+            <img src="images/1998_2.png" alt="1998 matrimonial layout sample 2" class="era-img">
+          </div>
+          <p class="era-caption"><b>1998 — Early phototypesetting.</b> Column counts increase as desktop publishing tools enter newsrooms. Headers remain visually near-identical to Bride listings — the ambiguity that motivates BANDHAN's language-aware refinement.</p>
+        </div>
+
+        <div class="era-panel" data-era="2010">
+          <div class="era-mock">
+            <img src="images/2010_1.png" alt="2010 matrimonial layout sample 1" class="era-img">
+            <img src="images/2010_2.png" alt="2010 matrimonial layout sample 2" class="era-img">
+          </div>
+          <p class="era-caption"><b>2010 — Standardized grid.</b> Digital typesetting introduces consistent gutters and grid-aligned columns. Aspect ratios stabilize for headers, while individual ad blocks remain budget-driven and highly variable.</p>
+        </div>
+
+        <div class="era-panel" data-era="2024">
+          <div class="era-mock">
+            <img src="images/2024_1.png" alt="2024 matrimonial layout sample 1" class="era-img">
+            <img src="images/2024_2.png" alt="2024 matrimonial layout sample 2" class="era-img">
+          </div>
+          <p class="era-caption"><b>2024 — Digital hybrid layout.</b> Rounded card-like ad blocks, variable typography, and design flourishes appear alongside legacy column conventions — a hybrid of newsprint habit and web-influenced design.</p>
+        </div>
+      </div>
+
+      <div class="scrubber-controls" id="eraControls">
+        <button class="era-btn active" data-era="1984"><span class="yr">1984</span><span class="lbl">Dense-packing</span></button>
+        <button class="era-btn" data-era="1998"><span class="yr">1998</span><span class="lbl">Phototypeset</span></button>
+        <button class="era-btn" data-era="2010"><span class="yr">2010</span><span class="lbl">Grid layout</span></button>
+        <button class="era-btn" data-era="2024"><span class="yr">2024</span><span class="lbl">Digital hybrid</span></button>
+      </div>
+    </div>
+    
+  </div>
+</section>
+
+<section class="two-col" id="dataset">
+  <div class="col">
+    <p class="section-label">02 — Acquisition</p>
+    <h2 class="section-heading" style="margin-bottom:18px;">Sourcing &amp; digitization</h2>
+    <p>
+      We performed <strong>stratified sampling</strong> from six major Bengali newspapers —
+      Ananda Bazar Patrika, Bartaman, Ei Samay, Sangbad Pratidin, Aajkaal, and Ganashakti.
+      Physical copies were digitized at <strong>300 DPI</strong> using flatbed scanners.
+    </p>
+    <p>
+      Sampling was designed to maximize temporal coverage across four print-technology eras,
+      deliberately capturing systematic variation in typesetting convention and document
+      degradation rather than treating it as noise to be discarded.
+    </p>
+  </div>
+  <div class="col">
+    <p class="section-label">&nbsp;</p>
+    <h2 class="section-heading" style="margin-bottom:18px; visibility:hidden; height:0; margin:0;"></h2>
+    <img src="images/bandhan_annotation_pipeline.png" alt="BANDHAN annotation pipeline" class="pipeline-fig">
+    <p class="fig-caption">Fig. 1 — <b>The proposed BANDHAN annotation pipeline.</p>
+  </div>
+</section>
+
+<section class="steps">
+  <div class="wrap">
+    <p class="section-label">03 — Annotation pipeline</p>
+    <h2 class="section-heading">A human-in-the-loop pipeline for layout and text</h2>
+    <p class="section-intro">Two coupled annotation tasks turn a scanned newspaper page into structured, machine-readable ground truth.</p>
+
+    <div class="step-grid">
+      <div class="step">
+        <div class="step-num">01</div>
+        <h3>Layout segmentation</h3>
+        <p>
+          Spatial regions annotated in LabelMe across three semantic classes: <em>Advertisement</em>,
+          <em>Bride</em>, and <em>Groom</em>. "Advertisement" denotes the cropped matrimonial listing itself;
+          "Bride" / "Groom" denote section headers. Annotators held to a strict 2px boundary tolerance to
+          prevent merge errors in dense, narrow-gutter columns.
+        </p>
+        <span class="tag">COCO JSON format</span>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <h3>Multi-engine OCR drafting</h3>
+        <p>
+          A custom GUI, <strong>3-Netra</strong> (<em>"The Third Eye"</em>), generates baseline transcriptions
+          for each cropped advertisement using three OCR engines — OLM-OCR2, DeepSeek-VL, and EasyOCR — run in
+          parallel for every region.
+        </p>
+        <span class="tag">Python · custom tool</span>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <h3>Selection &amp; correction</h3>
+        <p>
+          Rather than transcribing from scratch, annotators select the most accurate of the three OCR
+          candidates and edit it to match ground truth — saved as one text file per annotation box.
+          10% of samples underwent double-blind review by independent linguists.
+        </p>
+        <span class="tag">κ &gt; 0.85 IAA</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="stats">
+  <div class="wrap">
+    <p class="section-label">04 — Dataset at a glance</p>
+    <h2 class="section-heading">Statistics</h2>
+    <div class="stats-grid">
+      <div class="stat-cell"><span class="stat-num">1984–2024</span><span class="stat-lbl">archival span</span></div>
+      <div class="stat-cell"><span class="stat-num">6</span><span class="stat-lbl">source newspapers</span></div>
+      <div class="stat-cell"><span class="stat-num">3</span><span class="stat-lbl">layout classes</span></div>
+      <div class="stat-cell"><span class="stat-num">κ &gt; 0.85</span><span class="stat-lbl">inter-annotator agreement</span></div>
+    </div>
+    <p class="table-note">Detailed per-class and per-decade counts are reported in Table 1 of the paper (<code>tables/tab1_statistics.tex</code>) — insert the rendered table here once available.</p>
+  </div>
+</section>
+
+<section class="challenges">
+  <div class="wrap">
+    <p class="section-label">05 — What makes BANDHAN hard</p>
+    <h2 class="section-heading">Dataset characteristics &amp; challenges</h2>
+    <p class="section-intro">BANDHAN's difficulty doesn't come from scale — it comes from the genre's own structure, compared against generic layout corpora such as PubLayNet.</p>
+
+    <div class="challenge-list">
+      <div class="challenge">
+        <div class="challenge-name">Temporal distribution &amp; class imbalance<span class="vs">vs. balanced synthetic sets</span></div>
+        <p>Publication volume grows substantially across the four decades. Because a single Bride or Groom header governs a long column of individual listings, <em>Advertisement</em> instances vastly outnumber header classes — forcing models to learn minority-class representations under heavy imbalance.</p>
+      </div>
+      <div class="challenge">
+        <div class="challenge-name">Bimodal geometric distribution<span class="vs">aspect ratio extremes</span></div>
+        <p>Bride/Groom headers form a tight, low-variance cluster of short-and-wide boxes reflecting standardized editorial formatting. Advertisement boxes, by contrast, range from small squares to tall columns — driven by cost-per-character pricing rather than semantic content.</p>
+      </div>
+      <div class="challenge">
+        <div class="challenge-name">Visual similarity<span class="vs">header vs. ad confusion</span></div>
+        <p>Bride and Groom headers frequently share identical fonts, sizes, and top-of-column position — geometrically near-indistinguishable from each other, motivating language-aware label refinement rather than geometry alone.</p>
+      </div>
+      <div class="challenge">
+        <div class="challenge-name">Temporal drift &amp; degradation<span class="vs">1980s vs. 2020s</span></div>
+        <p>The archive shifts from dense-packing layouts with hairline rules (1980s) to standardized grids (2020s). Early decades carry ink-bleed, non-linear warping, and paper aging — a genuinely rigorous robustness testbed.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cite-section" id="citation">
+  <div class="wrap">
+    <p class="section-label">06 — Citation</p>
+    <h2 class="section-heading" style="margin-bottom:22px;">Cite this work</h2>
+    <div class="cite-box">
+      <button class="copy-btn" onclick="copyCite()">Copy</button>
+      <pre id="citeText" style="margin:0; white-space:pre-wrap;">@inproceedings{anonymous2026bandhan,
+  title     = {Resolving Visual Ambiguity in Dense Layouts via Magnitude Pruning and Semantic Rectification},
+  author    = {Amisha Mishra, Mayurakshi Chaudhuri, Chiranjoy Chattopadhyay, and Shreemoyee Guha Thakurata},
+  booktitle = {Proceedings of Workshop on Machine Learning, Intenational Conference on Document Analysis and Recognition},
+  year      = {2026},
+  note      = {Dataset: https://anonymous.4open.science/r/porinoy_dataset-7DB5/README.md}
+}</pre>
+</section>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer-row">
+      <span>BANDHAN Dataset &nbsp;&nbsp;</span>
+      <span>
+        <a href="https://anonymous.4open.science/r/porinoy_dataset-7DB5/README.md">Dataset Repository</a> &nbsp;
+      </span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const buttons = document.querySelectorAll('.era-btn');
+  const panels = document.querySelectorAll('.era-panel');
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const era = btn.getAttribute('data-era');
+      buttons.forEach(b => b.classList.toggle('active', b === btn));
+      panels.forEach(p => p.classList.toggle('active', p.getAttribute('data-era') === era));
+    });
+  });
+
+  function copyCite(){
+    const text = document.getElementById('citeText').innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.querySelector('.copy-btn');
+      const old = btn.textContent;
+      btn.textContent = 'Copied';
+      setTimeout(() => btn.textContent = old, 1500);
+    });
+  }
+</script>
+
+</body>
 </html>
